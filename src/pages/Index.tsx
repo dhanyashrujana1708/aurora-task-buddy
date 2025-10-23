@@ -4,6 +4,7 @@ import { Auth } from "@/components/Auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskList } from "@/components/TaskList";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { WeatherRescheduler } from "@/components/WeatherRescheduler";
 import { MotivationQuote } from "@/components/MotivationQuote";
 import { ChatBot } from "@/components/ChatBot";
 import { NotionSettings } from "@/components/NotionSettings";
@@ -233,6 +234,9 @@ const Index = () => {
           <MotivationQuote />
           <WeatherWidget />
         </div>
+
+        {/* Weather Rescheduler Alert */}
+        <WeatherRescheduler onReschedule={fetchTasks} />
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">
