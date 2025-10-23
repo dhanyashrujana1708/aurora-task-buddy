@@ -102,8 +102,8 @@ serve(async (req) => {
         // Extract task data from Notion page properties
         const properties = page.properties;
         
-        // Get title (Name property)
-        const titleProp = properties.Name || properties.Title || properties.Task;
+        // Get title (Task Name property - note the space!)
+        const titleProp = properties["Task Name"] || properties.Name || properties.Title || properties.Task;
         let title = "Untitled Task";
         if (titleProp?.title && titleProp.title.length > 0) {
           title = titleProp.title[0].plain_text;
@@ -145,11 +145,18 @@ serve(async (req) => {
           category = categoryProp.select.name;
         }
 
-        // Check if outdoor
+        // Check if outdoor - check both "Is Outdoor" checkbox and "Context" multi_select
         const isOutdoorProp = properties["Is Outdoor"] || properties.Outdoor;
+        const contextProp = properties.Context;
         let isOutdoor = false;
+        
         if (isOutdoorProp?.checkbox !== undefined) {
           isOutdoor = isOutdoorProp.checkbox;
+        } else if (contextProp?.multi_select) {
+          // Check if "outdoor" is in the Context tags
+          isOutdoor = contextProp.multi_select.some(
+            (tag: any) => tag.name.toLowerCase() === "outdoor"
+          );
         }
 
         // Insert task
