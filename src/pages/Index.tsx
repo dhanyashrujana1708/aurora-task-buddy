@@ -11,7 +11,6 @@ import { NotionSettings } from "@/components/NotionSettings";
 import { Button } from "@/components/ui/button";
 import { useTaskReminders } from "@/hooks/useTaskReminders";
 import { RescheduledTasksNotice } from "@/components/RescheduledTasksNotice";
-import { AgenticAISuggestions } from "@/components/AgenticAISuggestions";
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { Settings, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -244,11 +243,6 @@ const Index = () => {
 
         {/* Weather Rescheduler Alert */}
         <WeatherRescheduler onReschedule={fetchTasks} />
-
-        {/* AI Agent Suggestions */}
-        {session?.user?.id && (
-          <AgenticAISuggestions userId={session.user.id} onUpdate={fetchTasks} />
-        )}
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">
