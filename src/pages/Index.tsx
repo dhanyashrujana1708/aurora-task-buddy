@@ -28,6 +28,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [todayTasks, setTodayTasks] = useState([]);
   const [tomorrowTasks, setTomorrowTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [notionApiKey, setNotionApiKey] = useState<string | null>(null);
   const [notionDatabaseId, setNotionDatabaseId] = useState<string | null>(null);
@@ -100,11 +101,19 @@ const Index = () => {
         .lte("scheduled_date", endOfDay(tomorrow).toISOString())
         .order("scheduled_date", { ascending: true });
 
+      const { data: allData, error: allError } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", session?.user?.id)
+        .order("scheduled_date", { ascending: true });
+
       if (todayError) throw todayError;
       if (tomorrowError) throw tomorrowError;
+      if (allError) throw allError;
 
       setTodayTasks(todayData || []);
       setTomorrowTasks(tomorrowData || []);
+      setAllTasks(allData || []);
     } catch (error: any) {
       toast.error("Error fetching tasks");
       console.error(error);
@@ -230,15 +239,19 @@ const Index = () => {
           {/* Tasks Section */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="today" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 aurora-card">
+              <TabsList className="grid w-full grid-cols-3 aurora-card">
                 <TabsTrigger value="today">Today's Tasks</TabsTrigger>
                 <TabsTrigger value="tomorrow">Tomorrow's Tasks</TabsTrigger>
+                <TabsTrigger value="all">All Tasks</TabsTrigger>
               </TabsList>
               <TabsContent value="today" className="mt-6">
                 <TaskList tasks={todayTasks} onTaskUpdate={fetchTasks} />
               </TabsContent>
               <TabsContent value="tomorrow" className="mt-6">
                 <TaskList tasks={tomorrowTasks} onTaskUpdate={fetchTasks} />
+              </TabsContent>
+              <TabsContent value="all" className="mt-6">
+                <TaskList tasks={allTasks} onTaskUpdate={fetchTasks} />
               </TabsContent>
             </Tabs>
           </div>
