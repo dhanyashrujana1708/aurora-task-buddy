@@ -209,32 +209,6 @@ const Index = () => {
                   <Separator />
 
                   <div>
-                    <h3 className="text-sm font-semibold mb-3">Task Management</h3>
-                    <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        Incomplete tasks are automatically rescheduled to tomorrow every hour.
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={async () => {
-                          try {
-                            const { data, error } = await supabase.functions.invoke('reschedule-overdue-tasks');
-                            if (error) throw error;
-                            toast.success(data.message || 'Checked for overdue tasks');
-                            fetchTasks();
-                          } catch (error: any) {
-                            toast.error('Failed to reschedule tasks: ' + error.message);
-                          }
-                        }}
-                      >
-                        Reschedule Overdue Tasks Now
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
                     <h3 className="text-sm font-semibold mb-3">Notion Integration</h3>
                     <NotionSettings
                       userId={session?.user?.id}
