@@ -29,14 +29,20 @@ const Index = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   useEffect(() => {
+    console.log("Index component mounted");
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Session fetched:", session);
       setSession(session);
+      setLoading(false);
+    }).catch(error => {
+      console.error("Error getting session:", error);
       setLoading(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", session);
       setSession(session);
     });
 
@@ -122,10 +128,15 @@ const Index = () => {
     toast.success("Signed out successfully");
   };
 
+  console.log("Render - loading:", loading, "session:", session);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-primary text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-pulse text-2xl font-bold text-primary mb-2">Loading...</div>
+          <p className="text-muted-foreground">Initializing Aurora Task Planner</p>
+        </div>
       </div>
     );
   }
