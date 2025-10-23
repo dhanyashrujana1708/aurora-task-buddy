@@ -207,9 +207,20 @@ Current user ID: ${user.id}`;
           if (error) {
             responseText = `I encountered an error adding the task: ${error.message}`;
           } else {
-            responseText = `✅ Task added successfully! "${args.title}" is scheduled for ${new Date(
-              args.scheduled_date
-            ).toLocaleString()}.`;
+            // Convert UTC time to IST for display (UTC + 5:30)
+            const utcDate = new Date(args.scheduled_date);
+            const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+            const istTimeString = istDate.toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'numeric', 
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+              timeZone: 'UTC' // We've already adjusted, so read as UTC
+            });
+            
+            responseText = `✅ Task added successfully! "${args.title}" is scheduled for ${istTimeString} IST.`;
             actionPerformed = true;
           }
         } else if (functionName === "update_task") {
