@@ -12,6 +12,8 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header:', authHeader ? 'Present' : 'Missing');
+    
     if (!authHeader) {
       throw new Error('No authorization header');
     }
@@ -22,12 +24,17 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    console.log('User fetch result:', { user: user?.id, error: userError });
+    
+    if (!user) {
+      console.error('User authentication failed:', userError);
+      throw new Error('Not authenticated: ' + (userError?.message || 'Unknown error'));
+    }
 
     const { action } = await req.json();
 
-    console.log('Agentic AI action:', action);
+    console.log('Agentic AI action:', action, 'for user:', user.id);
 
     if (action === 'analyze_and_suggest') {
       // Fetch user's tasks, patterns, and analytics
