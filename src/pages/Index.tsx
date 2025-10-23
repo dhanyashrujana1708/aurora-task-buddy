@@ -246,14 +246,16 @@ const Index = () => {
         <WeatherRescheduler onReschedule={fetchTasks} />
 
         {/* AI Agent Suggestions */}
-        <AgenticAISuggestions userId={session?.user?.id} onUpdate={fetchTasks} />
+        {session?.user?.id && (
+          <AgenticAISuggestions userId={session.user.id} onUpdate={fetchTasks} />
+        )}
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Tasks Section */}
           <div className="lg:col-span-2 space-y-6">
             {/* Insights Panel */}
-            <InsightsPanel userId={session?.user?.id} />
+            {session?.user?.id && <InsightsPanel userId={session.user.id} />}
             
             <Tabs defaultValue="today" className="w-full">
               <TabsList className="grid w-full grid-cols-3 aurora-card">
