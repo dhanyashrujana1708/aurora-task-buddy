@@ -8,89 +8,89 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Aurora pastel theme */
+    --background: 260 100% 98%;
+    --foreground: 260 60% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 260 100% 100%;
+    --card-foreground: 260 60% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 260 100% 100%;
+    --popover-foreground: 260 60% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 280 70% 70%;
+    --primary-foreground: 260 100% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 310 100% 90%;
+    --secondary-foreground: 260 60% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 260 50% 95%;
+    --muted-foreground: 260 30% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 200 100% 85%;
+    --accent-foreground: 200 60% 30%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 80% 65%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 260 40% 90%;
+    --input: 260 40% 90%;
+    --ring: 280 70% 70%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Custom aurora gradients */
+    --aurora-gradient: linear-gradient(135deg, hsl(280, 70%, 85%) 0%, hsl(310, 100%, 90%) 25%, hsl(200, 100%, 85%) 50%, hsl(150, 60%, 85%) 100%);
+    --aurora-glow: 0 0 40px hsl(280 70% 70% / 0.3);
+    --aurora-soft-glow: 0 10px 30px hsl(280 70% 70% / 0.15);
+    
+    --sidebar-background: 260 100% 98%;
+    --sidebar-foreground: 260 60% 20%;
+    --sidebar-primary: 280 70% 70%;
+    --sidebar-primary-foreground: 260 100% 100%;
+    --sidebar-accent: 260 50% 95%;
+    --sidebar-accent-foreground: 260 60% 30%;
+    --sidebar-border: 260 40% 90%;
+    --sidebar-ring: 280 70% 70%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 260 60% 8%;
+    --foreground: 260 30% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 260 50% 12%;
+    --card-foreground: 260 30% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 260 50% 12%;
+    --popover-foreground: 260 30% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 280 70% 65%;
+    --primary-foreground: 260 100% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 260 40% 20%;
+    --secondary-foreground: 260 30% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 260 40% 20%;
+    --muted-foreground: 260 20% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 70% 50%;
+    --accent-foreground: 260 30% 95%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 260 40% 20%;
+    --input: 260 40% 20%;
+    --ring: 280 70% 65%;
+    
+    --sidebar-background: 260 60% 8%;
+    --sidebar-foreground: 260 30% 95%;
+    --sidebar-primary: 280 70% 65%;
+    --sidebar-primary-foreground: 260 100% 100%;
+    --sidebar-accent: 260 40% 20%;
+    --sidebar-accent-foreground: 260 30% 95%;
+    --sidebar-border: 260 40% 20%;
+    --sidebar-ring: 280 70% 65%;
   }
 }
 
@@ -101,5 +101,20 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: var(--aurora-gradient);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .aurora-card {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: var(--aurora-soft-glow);
+  }
+  
+  .aurora-glow {
+    box-shadow: var(--aurora-glow);
   }
 }

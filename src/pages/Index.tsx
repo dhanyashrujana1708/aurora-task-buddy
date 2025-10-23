@@ -1,11 +1,218 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Auth } from "@/components/Auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TaskList } from "@/components/TaskList";
+import { WeatherWidget } from "@/components/WeatherWidget";
+import { MotivationQuote } from "@/components/MotivationQuote";
+import { ChatBot } from "@/components/ChatBot";
+import { Button } from "@/components/ui/button";
+import { Settings, LogOut } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { addDays, startOfDay, endOfDay, format } from "date-fns";
 
 const Index = () => {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [todayTasks, setTodayTasks] = useState([]);
+  const [tomorrowTasks, setTomorrowTasks] = useState([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (session) {
+      fetchTasks();
+      fetchProfile();
+    }
+  }, [session]);
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("notifications_enabled")
+        .eq("id", session?.user?.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setNotificationsEnabled(data.notifications_enabled);
+      }
+    } catch (error: any) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const today = new Date();
+      const tomorrow = addDays(today, 1);
+
+      const { data: todayData, error: todayError } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", session?.user?.id)
+        .gte("scheduled_date", startOfDay(today).toISOString())
+        .lte("scheduled_date", endOfDay(today).toISOString())
+        .order("scheduled_date", { ascending: true });
+
+      const { data: tomorrowData, error: tomorrowError } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", session?.user?.id)
+        .gte("scheduled_date", startOfDay(tomorrow).toISOString())
+        .lte("scheduled_date", endOfDay(tomorrow).toISOString())
+        .order("scheduled_date", { ascending: true });
+
+      if (todayError) throw todayError;
+      if (tomorrowError) throw tomorrowError;
+
+      setTodayTasks(todayData || []);
+      setTomorrowTasks(tomorrowData || []);
+    } catch (error: any) {
+      toast.error("Error fetching tasks");
+      console.error(error);
+    }
+  };
+
+  const handleNotificationToggle = async (enabled: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ notifications_enabled: enabled })
+        .eq("id", session?.user?.id);
+
+      if (error) throw error;
+      setNotificationsEnabled(enabled);
+      toast.success(
+        enabled ? "Notifications enabled" : "Notifications disabled"
+      );
+    } catch (error: any) {
+      toast.error("Error updating settings");
+      console.error(error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out successfully");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-primary text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+              Aurora Task Planner
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {format(new Date(), "EEEE, MMMM d, yyyy")}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon" className="aurora-card">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="aurora-card">
+                <DialogHeader>
+                  <DialogTitle>Settings</DialogTitle>
+                  <DialogDescription>
+                    Manage your preferences
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="notifications">Task Reminders</Label>
+                    <Switch
+                      id="notifications"
+                      checked={notificationsEnabled}
+                      onCheckedChange={handleNotificationToggle}
+                    />
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleSignOut}
+              className="aurora-card"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Top Section */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <MotivationQuote />
+          <WeatherWidget />
+        </div>
+
+        {/* Main Content */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Tasks Section */}
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="today" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 aurora-card">
+                <TabsTrigger value="today">Today's Tasks</TabsTrigger>
+                <TabsTrigger value="tomorrow">Tomorrow's Tasks</TabsTrigger>
+              </TabsList>
+              <TabsContent value="today" className="mt-6">
+                <TaskList tasks={todayTasks} onTaskUpdate={fetchTasks} />
+              </TabsContent>
+              <TabsContent value="tomorrow" className="mt-6">
+                <TaskList tasks={tomorrowTasks} onTaskUpdate={fetchTasks} />
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Chatbot Section */}
+          <div>
+            <ChatBot onTaskUpdate={fetchTasks} />
+          </div>
+        </div>
       </div>
     </div>
   );

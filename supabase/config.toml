@@ -1,0 +1,10 @@
+project_id = "qnabmzmdgughmhiurirx"
+
+[functions.task-chat]
+verify_jwt = true
+
+[functions.get-weather]
+verify_jwt = false
+
+[functions.get-motivation-quote]
+verify_jwt = false
