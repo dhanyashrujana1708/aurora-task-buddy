@@ -41,19 +41,29 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    // Get current date/time for context
+    // Get current date/time for context - User is in IST (UTC+5:30)
     const now = new Date();
-    const currentDateTime = now.toISOString();
-    const currentDateString = now.toLocaleDateString('en-US', { 
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const istNow = new Date(now.getTime() + istOffset);
+    
+    const currentDateString = istNow.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric' 
+      day: 'numeric',
+      timeZone: 'UTC' // We've already adjusted to IST, so read as UTC
+    });
+    
+    const currentTimeString = istNow.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'UTC'
     });
 
     const systemPrompt = `You are Aurora, an AI task planning assistant. You help users manage their tasks naturally and intelligently.
 
-IMPORTANT: Current date and time is ${currentDateString} (${currentDateTime}).
+IMPORTANT: Current date and time in India (IST): ${currentDateString}, ${currentTimeString}
 
 Your capabilities:
 1. Add new tasks with details (title, description, date/time, priority, category, whether it's outdoor)
@@ -65,14 +75,20 @@ Your capabilities:
 When users request to add a task, extract:
 - Title (required)
 - Description (optional)
-- Scheduled date/time: MUST use current date (${currentDateTime}) when user says "today" or doesn't specify a date. Parse relative dates like "tomorrow", "next week" correctly based on current date.
+- Scheduled date/time: When user specifies a time like "1 PM" or "3:30 PM", interpret it as IST (India Standard Time). Return the ISO string in UTC by subtracting 5 hours 30 minutes. For example: "1:00 PM IST today" should be "${istNow.toISOString().split('T')[0]}T07:30:00.000Z" (1 PM - 5:30 hours = 7:30 AM UTC).
 - Priority (low/medium/high, default medium)
 - Category (optional)
 - Is outdoor task (true/false, default false)
 
-CRITICAL: Always calculate dates relative to the current date (${currentDateString}). 
-- "today" = ${currentDateTime.split('T')[0]}
-- "tomorrow" = ${new Date(now.getTime() + 86400000).toISOString().split('T')[0]}
+CRITICAL TIME CONVERSION: 
+- User times are in IST (UTC+5:30)
+- Database needs UTC time
+- Subtract 5 hours 30 minutes from user's requested time
+- Example: User says "2 PM" → Save as "08:30:00.000Z" (2 PM - 5:30 = 8:30 AM UTC)
+
+CRITICAL: Always calculate dates relative to the current IST date (${currentDateString}). 
+- "today" = ${istNow.toISOString().split('T')[0]}
+- "tomorrow" = ${new Date(istNow.getTime() + 86400000).toISOString().split('T')[0]}
 
 Be conversational, helpful, and proactive in organizing tasks efficiently.
 
