@@ -28,6 +28,7 @@ export const WeatherRescheduler = ({ onReschedule }: WeatherReschedulerProps) =>
   const [outdoorTasks, setOutdoorTasks] = useState<Task[]>([]);
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [testMode, setTestMode] = useState(false);
 
   useEffect(() => {
     checkWeatherAndTasks();
@@ -72,12 +73,19 @@ export const WeatherRescheduler = ({ onReschedule }: WeatherReschedulerProps) =>
   };
 
   const isBadWeather = () => {
+    if (testMode) return true; // Force bad weather in test mode
     if (!weather) return false;
     return (
       weather.condition.toLowerCase().includes("rain") ||
       weather.condition.toLowerCase().includes("storm") ||
       weather.condition.toLowerCase().includes("snow")
     );
+  };
+
+  const enableTestMode = () => {
+    setTestMode(true);
+    setShowWarning(true);
+    toast.info("Test mode enabled - simulating bad weather");
   };
 
   const rescheduleOutdoorTasks = async () => {
@@ -112,7 +120,25 @@ export const WeatherRescheduler = ({ onReschedule }: WeatherReschedulerProps) =>
     }
   };
 
+  // Show test button if we have outdoor tasks but weather is good
   if (!showWarning || !isBadWeather()) {
+    if (outdoorTasks.length > 0 && !testMode) {
+      return (
+        <Card className="aurora-card p-4 border-blue-500/50 bg-blue-500/5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                You have {outdoorTasks.length} outdoor task(s) scheduled for today.
+                Current weather: {weather?.description || "Loading..."}
+              </p>
+            </div>
+            <Button onClick={enableTestMode} variant="outline" size="sm">
+              Test Rescheduler
+            </Button>
+          </div>
+        </Card>
+      );
+    }
     return null;
   }
 
@@ -128,7 +154,10 @@ export const WeatherRescheduler = ({ onReschedule }: WeatherReschedulerProps) =>
             <h3 className="font-semibold">Bad Weather Alert</h3>
           </div>
           <p className="text-sm text-muted-foreground mb-3">
-            You have {outdoorTasks.length} outdoor task(s) scheduled for today, but the weather is {weather?.description}.
+            {testMode ? (
+              <>🧪 Test Mode: Simulating bad weather. </>
+            ) : null}
+            You have {outdoorTasks.length} outdoor task(s) scheduled for today, but the weather is {testMode ? "rainy" : weather?.description}.
             Would you like to reschedule them to tomorrow?
           </p>
           <div className="flex gap-2">
