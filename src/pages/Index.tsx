@@ -9,6 +9,7 @@ import { MotivationQuote } from "@/components/MotivationQuote";
 import { ChatBot } from "@/components/ChatBot";
 import { NotionSettings } from "@/components/NotionSettings";
 import { Button } from "@/components/ui/button";
+import { useTaskReminders } from "@/hooks/useTaskReminders";
 import { Settings, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -33,6 +34,9 @@ const Index = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [notionApiKey, setNotionApiKey] = useState<string | null>(null);
   const [notionDatabaseId, setNotionDatabaseId] = useState<string | null>(null);
+
+  // Enable task reminders
+  useTaskReminders(session?.user?.id);
 
   useEffect(() => {
     console.log("Index component mounted");
