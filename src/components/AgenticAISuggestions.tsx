@@ -70,8 +70,14 @@ export const AgenticAISuggestions = ({ userId, onUpdate }: { userId: string; onU
   const runAnalysis = async () => {
     setAnalyzing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
       const { data, error } = await supabase.functions.invoke('agentic-ai-planner', {
-        body: { action: 'analyze_and_suggest' }
+        body: { action: 'analyze_and_suggest' },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) throw error;
@@ -90,10 +96,16 @@ export const AgenticAISuggestions = ({ userId, onUpdate }: { userId: string; onU
   const applySuggestion = async (suggestionId: string) => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
       const { error } = await supabase.functions.invoke('agentic-ai-planner', {
         body: { 
           action: 'apply_suggestion',
           suggestionId 
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
