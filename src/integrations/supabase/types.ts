@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_suggestions: {
+        Row: {
+          applied_at: string | null
+          created_at: string | null
+          id: string
+          status: string | null
+          suggestion_data: Json
+          suggestion_type: string
+          user_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          suggestion_data: Json
+          suggestion_type: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          suggestion_data?: Json
+          suggestion_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -40,6 +70,56 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      task_analytics: {
+        Row: {
+          actual_duration: number | null
+          category: string | null
+          completed_time: string | null
+          created_at: string | null
+          estimated_duration: number | null
+          id: string
+          priority: string | null
+          scheduled_time: string | null
+          task_id: string | null
+          user_id: string
+          was_rescheduled: boolean | null
+        }
+        Insert: {
+          actual_duration?: number | null
+          category?: string | null
+          completed_time?: string | null
+          created_at?: string | null
+          estimated_duration?: number | null
+          id?: string
+          priority?: string | null
+          scheduled_time?: string | null
+          task_id?: string | null
+          user_id: string
+          was_rescheduled?: boolean | null
+        }
+        Update: {
+          actual_duration?: number | null
+          category?: string | null
+          completed_time?: string | null
+          created_at?: string | null
+          estimated_duration?: number | null
+          id?: string
+          priority?: string | null
+          scheduled_time?: string | null
+          task_id?: string | null
+          user_id?: string
+          was_rescheduled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_analytics_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -81,6 +161,36 @@ export type Database = {
           priority?: string | null
           scheduled_date?: string
           title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_patterns: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          id: string
+          pattern_data: Json
+          pattern_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          pattern_data: Json
+          pattern_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          pattern_data?: Json
+          pattern_type?: string
           updated_at?: string | null
           user_id?: string
         }
