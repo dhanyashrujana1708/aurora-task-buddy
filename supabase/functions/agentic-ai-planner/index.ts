@@ -96,36 +96,38 @@ Provide actionable, specific suggestions with reasoning.`
           tools: [
             {
               type: 'function',
-              name: 'create_suggestion',
-              description: 'Create a task suggestion, scheduling recommendation, or prioritization change',
-              parameters: {
-                type: 'object',
-                properties: {
-                  suggestions: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        type: { 
-                          type: 'string',
-                          enum: ['new_task', 'reschedule', 'reprioritize', 'break_down', 'time_block']
+              function: {
+                name: 'create_suggestion',
+                description: 'Create a task suggestion, scheduling recommendation, or prioritization change',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    suggestions: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          type: { 
+                            type: 'string',
+                            enum: ['new_task', 'reschedule', 'reprioritize', 'break_down', 'time_block']
+                          },
+                          title: { type: 'string' },
+                          reason: { type: 'string' },
+                          data: { 
+                            type: 'object',
+                            description: 'Task details including title, description, priority, category, scheduled_date, etc.'
+                          },
+                          confidence: { 
+                            type: 'number',
+                            description: 'Confidence score 0-1'
+                          }
                         },
-                        title: { type: 'string' },
-                        reason: { type: 'string' },
-                        data: { 
-                          type: 'object',
-                          description: 'Task details including title, description, priority, category, scheduled_date, etc.'
-                        },
-                        confidence: { 
-                          type: 'number',
-                          description: 'Confidence score 0-1'
-                        }
-                      },
-                      required: ['type', 'title', 'reason', 'data', 'confidence']
+                        required: ['type', 'title', 'reason', 'data', 'confidence']
+                      }
                     }
-                  }
-                },
-                required: ['suggestions']
+                  },
+                  required: ['suggestions']
+                }
               }
             }
           ],
