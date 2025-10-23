@@ -63,18 +63,14 @@ Deno.serve(async (req) => {
       // Build context for AI
       const context = buildAnalysisContext(tasks, patterns, analytics);
 
-      // Call OpenAI for intelligent analysis
-      const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-      if (!OPENAI_API_KEY) throw new Error('OPENAI_API_KEY not configured');
-
-      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Call Lovable AI for intelligent analysis
+      const aiResponse = await fetch('https://api.lovable.app/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'google/gemini-2.5-flash',
           messages: [
             {
               role: 'system',
