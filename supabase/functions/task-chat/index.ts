@@ -41,7 +41,19 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
+    // Get current date/time for context
+    const now = new Date();
+    const currentDateTime = now.toISOString();
+    const currentDateString = now.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
     const systemPrompt = `You are Aurora, an AI task planning assistant. You help users manage their tasks naturally and intelligently.
+
+IMPORTANT: Current date and time is ${currentDateString} (${currentDateTime}).
 
 Your capabilities:
 1. Add new tasks with details (title, description, date/time, priority, category, whether it's outdoor)
@@ -53,10 +65,14 @@ Your capabilities:
 When users request to add a task, extract:
 - Title (required)
 - Description (optional)
-- Scheduled date/time (default to today if not specified)
+- Scheduled date/time: MUST use current date (${currentDateTime}) when user says "today" or doesn't specify a date. Parse relative dates like "tomorrow", "next week" correctly based on current date.
 - Priority (low/medium/high, default medium)
 - Category (optional)
 - Is outdoor task (true/false, default false)
+
+CRITICAL: Always calculate dates relative to the current date (${currentDateString}). 
+- "today" = ${currentDateTime.split('T')[0]}
+- "tomorrow" = ${new Date(now.getTime() + 86400000).toISOString().split('T')[0]}
 
 Be conversational, helpful, and proactive in organizing tasks efficiently.
 
