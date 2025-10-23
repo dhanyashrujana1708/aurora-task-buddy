@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useTaskReminders } from "@/hooks/useTaskReminders";
 import { RescheduledTasksNotice } from "@/components/RescheduledTasksNotice";
 import { InsightsPanel } from "@/components/InsightsPanel";
+import { AutoTaskGenerator } from "@/components/AutoTaskGenerator";
 import { Settings, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -243,6 +244,9 @@ const Index = () => {
 
         {/* Weather Rescheduler Alert */}
         <WeatherRescheduler onReschedule={fetchTasks} />
+
+        {/* AI Task Generator */}
+        <AutoTaskGenerator onTasksGenerated={fetchTasks} />
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-6">

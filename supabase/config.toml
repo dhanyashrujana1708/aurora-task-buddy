@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.import-notion-tasks]
 verify_jwt = true
+
+[functions.auto-generate-tasks]
+verify_jwt = true
