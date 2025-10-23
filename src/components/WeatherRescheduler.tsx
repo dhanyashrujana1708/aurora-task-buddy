@@ -27,8 +27,8 @@ export const WeatherRescheduler = ({ onReschedule }: WeatherReschedulerProps) =>
   const [weather, setWeather] = useState<Weather | null>(null);
   const [outdoorTasks, setOutdoorTasks] = useState<Task[]>([]);
   const [isRescheduling, setIsRescheduling] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-  const [testMode, setTestMode] = useState(false);
+  const [showWarning, setShowWarning] = useState(true); // Auto-show for demo
+  const [testMode, setTestMode] = useState(true); // Enable test mode by default
 
   useEffect(() => {
     checkWeatherAndTasks();
