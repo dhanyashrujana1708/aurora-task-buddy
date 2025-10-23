@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.get-motivation-quote]
 verify_jwt = false
+
+[functions.import-notion-tasks]
+verify_jwt = true

@@ -6,6 +6,7 @@ import { TaskList } from "@/components/TaskList";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { MotivationQuote } from "@/components/MotivationQuote";
 import { ChatBot } from "@/components/ChatBot";
+import { NotionSettings } from "@/components/NotionSettings";
 import { Button } from "@/components/ui/button";
 import { Settings, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -18,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { addDays, startOfDay, endOfDay, format } from "date-fns";
 
@@ -27,6 +29,8 @@ const Index = () => {
   const [todayTasks, setTodayTasks] = useState([]);
   const [tomorrowTasks, setTomorrowTasks] = useState([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notionApiKey, setNotionApiKey] = useState<string | null>(null);
+  const [notionDatabaseId, setNotionDatabaseId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("Index component mounted");
@@ -60,13 +64,15 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("notifications_enabled")
+        .select("notifications_enabled, notion_api_key, notion_database_id")
         .eq("id", session?.user?.id)
         .single();
 
       if (error) throw error;
       if (data) {
         setNotificationsEnabled(data.notifications_enabled);
+        setNotionApiKey(data.notion_api_key);
+        setNotionDatabaseId(data.notion_database_id);
       }
     } catch (error: any) {
       console.error("Error fetching profile:", error);
@@ -165,20 +171,38 @@ const Index = () => {
                   <Settings className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="aurora-card">
+              <DialogContent className="aurora-card max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Settings</DialogTitle>
                   <DialogDescription>
-                    Manage your preferences
+                    Manage your preferences and integrations
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="notifications">Task Reminders</Label>
-                    <Switch
-                      id="notifications"
-                      checked={notificationsEnabled}
-                      onCheckedChange={handleNotificationToggle}
+                <div className="space-y-6 py-4">
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3">Preferences</h3>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notifications">Task Reminders</Label>
+                      <Switch
+                        id="notifications"
+                        checked={notificationsEnabled}
+                        onCheckedChange={handleNotificationToggle}
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3">Notion Integration</h3>
+                    <NotionSettings
+                      userId={session?.user?.id}
+                      notionApiKey={notionApiKey}
+                      notionDatabaseId={notionDatabaseId}
+                      onUpdate={() => {
+                        fetchProfile();
+                        fetchTasks();
+                      }}
                     />
                   </div>
                 </div>
