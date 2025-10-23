@@ -13,26 +13,25 @@ serve(async (req) => {
   }
 
   try {
-    // Using OpenWeatherMap API for Davanagere, India
-    // For production, you'd want to get an API key from openweathermap.org
-    // For now, we'll return mock data to get started
-    const weatherData = {
-      temp: 28,
-      condition: "Clear",
-      description: "clear sky",
-    };
+    const WEATHER_API_KEY = Deno.env.get("OPENWEATHER_API_KEY");
+    if (!WEATHER_API_KEY) {
+      throw new Error("OPENWEATHER_API_KEY not configured");
+    }
 
-    // In production with API key:
-    // const WEATHER_API_KEY = Deno.env.get("OPENWEATHER_API_KEY");
-    // const response = await fetch(
-    //   `https://api.openweathermap.org/data/2.5/weather?q=Davanagere,IN&units=metric&appid=${WEATHER_API_KEY}`
-    // );
-    // const data = await response.json();
-    // const weatherData = {
-    //   temp: data.main.temp,
-    //   condition: data.weather[0].main,
-    //   description: data.weather[0].description,
-    // };
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=Davanagere,IN&units=metric&appid=${WEATHER_API_KEY}`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const weatherData = {
+      temp: data.main.temp,
+      condition: data.weather[0].main,
+      description: data.weather[0].description,
+    };
 
     return new Response(JSON.stringify(weatherData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
