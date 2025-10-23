@@ -15,33 +15,40 @@ Deno.serve(async (req) => {
     console.log('Auth header:', authHeader ? 'Present' : 'Missing');
     
     if (!authHeader) {
-      throw new Error('No authorization header');
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const supabaseClient = createClient(
+    // Use service role to bypass RLS
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    console.log('User fetch result:', { user: user?.id, error: userError });
+    // Verify the JWT token and get user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    
+    console.log('User verification result:', { userId: user?.id, error: userError?.message });
     
     if (!user) {
-      console.error('User authentication failed:', userError);
-      throw new Error('Not authenticated: ' + (userError?.message || 'Unknown error'));
+      return new Response(
+        JSON.stringify({ error: 'Invalid token or user not found' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const { action } = await req.json();
-
     console.log('Agentic AI action:', action, 'for user:', user.id);
 
     if (action === 'analyze_and_suggest') {
       // Fetch user's tasks, patterns, and analytics
       const [tasksRes, patternsRes, analyticsRes] = await Promise.all([
-        supabaseClient.from('tasks').select('*').eq('user_id', user.id),
-        supabaseClient.from('user_patterns').select('*').eq('user_id', user.id),
-        supabaseClient.from('task_analytics').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
+        supabaseAdmin.from('tasks').select('*').eq('user_id', user.id),
+        supabaseAdmin.from('user_patterns').select('*').eq('user_id', user.id),
+        supabaseAdmin.from('task_analytics').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
       ]);
 
       const tasks = tasksRes.data || [];
@@ -142,7 +149,7 @@ Provide actionable, specific suggestions with reasoning.`
 
       // Store suggestions in database
       for (const suggestion of suggestions) {
-        await supabaseClient.from('ai_suggestions').insert({
+        await supabaseAdmin.from('ai_suggestions').insert({
           user_id: user.id,
           suggestion_type: suggestion.type,
           suggestion_data: {
@@ -156,7 +163,7 @@ Provide actionable, specific suggestions with reasoning.`
 
         // Auto-apply high-confidence suggestions
         if (suggestion.confidence > 0.8 && suggestion.type === 'new_task') {
-          await supabaseClient.from('tasks').insert({
+          await supabaseAdmin.from('tasks').insert({
             user_id: user.id,
             ...suggestion.data
           });
@@ -164,7 +171,7 @@ Provide actionable, specific suggestions with reasoning.`
       }
 
       // Update patterns based on analysis
-      await updateUserPatterns(supabaseClient, user.id, tasks, analytics);
+      await updateUserPatterns(supabaseAdmin, user.id, tasks, analytics);
 
       return new Response(
         JSON.stringify({ 
@@ -179,7 +186,7 @@ Provide actionable, specific suggestions with reasoning.`
     if (action === 'apply_suggestion') {
       const { suggestionId } = await req.json();
       
-      const { data: suggestion } = await supabaseClient
+      const { data: suggestion } = await supabaseAdmin
         .from('ai_suggestions')
         .select('*')
         .eq('id', suggestionId)
@@ -191,23 +198,23 @@ Provide actionable, specific suggestions with reasoning.`
       const suggestionData = suggestion.suggestion_data;
       
       if (suggestion.suggestion_type === 'new_task') {
-        await supabaseClient.from('tasks').insert({
+        await supabaseAdmin.from('tasks').insert({
           user_id: user.id,
           ...suggestionData.data
         });
       } else if (suggestion.suggestion_type === 'reschedule') {
-        await supabaseClient.from('tasks')
+        await supabaseAdmin.from('tasks')
           .update({ scheduled_date: suggestionData.data.new_time })
           .eq('id', suggestionData.data.task_id)
           .eq('user_id', user.id);
       } else if (suggestion.suggestion_type === 'reprioritize') {
-        await supabaseClient.from('tasks')
+        await supabaseAdmin.from('tasks')
           .update({ priority: suggestionData.data.new_priority })
           .eq('id', suggestionData.data.task_id)
           .eq('user_id', user.id);
       }
 
-      await supabaseClient.from('ai_suggestions')
+      await supabaseAdmin.from('ai_suggestions')
         .update({ status: 'accepted', applied_at: new Date().toISOString() })
         .eq('id', suggestionId);
 
@@ -262,7 +269,7 @@ ANALYZE:
 Provide specific, actionable suggestions with high confidence scores for auto-application.`;
 }
 
-async function updateUserPatterns(supabaseClient: any, userId: string, tasks: any[], analytics: any[]) {
+async function updateUserPatterns(supabaseAdmin: any, userId: string, tasks: any[], analytics: any[]) {
   // Analyze task completion times
   const completionTimes: { [hour: number]: number } = {};
   analytics.forEach(a => {
@@ -277,7 +284,7 @@ async function updateUserPatterns(supabaseClient: any, userId: string, tasks: an
     .map(([hour]) => parseInt(hour));
 
   if (productiveHours.length > 0) {
-    await supabaseClient.from('user_patterns').upsert({
+    await supabaseAdmin.from('user_patterns').upsert({
       user_id: userId,
       pattern_type: 'productive_hours',
       pattern_data: { hours: productiveHours },
@@ -299,7 +306,7 @@ async function updateUserPatterns(supabaseClient: any, userId: string, tasks: an
     .map(([cat, count]) => ({ category: cat, count }));
 
   if (topCategories.length > 0) {
-    await supabaseClient.from('user_patterns').upsert({
+    await supabaseAdmin.from('user_patterns').upsert({
       user_id: userId,
       pattern_type: 'category_preference',
       pattern_data: { preferences: topCategories },
