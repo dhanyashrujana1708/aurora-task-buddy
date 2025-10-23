@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Cloud, CloudRain, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Cloud, CloudRain, Sun, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Weather {
@@ -12,20 +13,27 @@ interface Weather {
 export const WeatherWidget = () => {
   const [weather, setWeather] = useState<Weather | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchWeather();
+    // Refresh weather every 5 minutes
+    const interval = setInterval(fetchWeather, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchWeather = async () => {
     try {
+      setIsRefreshing(true);
       const { data, error } = await supabase.functions.invoke("get-weather");
       if (error) throw error;
+      console.log("Weather data from API:", data);
       setWeather(data);
     } catch (error) {
       console.error("Error fetching weather:", error);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -56,7 +64,7 @@ export const WeatherWidget = () => {
     <Card className="aurora-card p-4">
       <div className="flex items-center gap-4">
         {getWeatherIcon()}
-        <div>
+        <div className="flex-1">
           <p className="text-sm text-muted-foreground">Davanagere, India</p>
           {weather && (
             <>
@@ -67,6 +75,15 @@ export const WeatherWidget = () => {
             </>
           )}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={fetchWeather}
+          disabled={isRefreshing}
+          className="h-8 w-8"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
     </Card>
   );
