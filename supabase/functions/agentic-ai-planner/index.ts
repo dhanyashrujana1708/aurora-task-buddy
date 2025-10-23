@@ -12,7 +12,6 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization');
-    console.log('Auth header:', authHeader ? 'Present' : 'Missing');
     
     if (!authHeader) {
       return new Response(
@@ -21,24 +20,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to bypass RLS
+    // Create client with user's token for authentication
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Verify user authentication
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('Authentication error:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role for database operations (bypasses RLS)
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-
-    // Verify the JWT token and get user
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    
-    console.log('User verification result:', { userId: user?.id, error: userError?.message });
-    
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token or user not found' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     const { action } = await req.json();
     console.log('Agentic AI action:', action, 'for user:', user.id);
