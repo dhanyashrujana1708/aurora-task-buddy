@@ -1,0 +1,17 @@
+{
+  "name": "Task Planner",
+  "short_name": "Tasks",
+  "description": "Your AI-powered personal task planning assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E9D5FF",
+  "theme_color": "#E9D5FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
