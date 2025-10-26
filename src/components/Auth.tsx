@@ -48,7 +48,7 @@ export const Auth = () => {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #E9D5FF 0%, #FFE4E6 25%, #BAE6FD 50%, #D1FAE5 100%)' }}>
       <Card className="aurora-card w-full max-w-md p-8 bg-white/80 backdrop-blur-xl">
         <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-purple-500 to-blue-400 bg-clip-text text-transparent">
-          Aurora Task Planner
+          Task Planner
         </h1>
         <p className="text-center text-gray-600 mb-6">
           Your AI-powered personal assistant

@@ -158,7 +158,7 @@ const Index = () => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-pulse text-2xl font-bold text-primary mb-2">Loading...</div>
-          <p className="text-muted-foreground">Initializing Aurora Task Planner</p>
+          <p className="text-muted-foreground">Initializing Task Planner</p>
         </div>
       </div>
     );
@@ -175,7 +175,7 @@ const Index = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-              Aurora Task Planner
+              Task Planner
             </h1>
             <p className="text-muted-foreground mt-1">
               {format(new Date(), "EEEE, MMMM d, yyyy")}

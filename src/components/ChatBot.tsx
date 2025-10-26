@@ -20,7 +20,7 @@ export const ChatBot = ({ onTaskUpdate }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your Aurora AI assistant. I can help you add, modify, or manage your tasks. What would you like to do?",
+      content: "Hi! I'm your AI assistant. I can help you add, modify, or manage your tasks. What would you like to do?",
     },
   ]);
   const [input, setInput] = useState("");
