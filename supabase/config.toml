@@ -14,3 +14,6 @@ verify_jwt = true
 
 [functions.auto-generate-tasks]
 verify_jwt = true
+
+[functions.send-push-notifications]
+verify_jwt = false

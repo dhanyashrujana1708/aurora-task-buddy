@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { subscribeToPushNotifications } from "@/utils/pushNotifications";
 
 interface Task {
   id: string;
@@ -15,19 +16,28 @@ export const useTaskReminders = (userId: string | undefined) => {
   useEffect(() => {
     if (!userId) return;
 
-    // Request notification permission
-    const requestPermission = async () => {
+    // Request notification permission and subscribe to push
+    const setupNotifications = async () => {
       if ("Notification" in window && Notification.permission === "default") {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
-          toast.success("Task reminders enabled! You'll get notifications 30 minutes before tasks.");
+          // Subscribe to push notifications
+          const subscribed = await subscribeToPushNotifications(userId);
+          if (subscribed) {
+            toast.success("Push notifications enabled! You'll get reminders even when the site is closed.");
+          } else {
+            toast.success("Task reminders enabled! You'll get notifications 30 minutes before tasks.");
+          }
         } else if (permission === "denied") {
           toast.info("Enable notifications in your browser settings to get task reminders.");
         }
+      } else if (Notification.permission === "granted") {
+        // Already has permission, just subscribe to push
+        await subscribeToPushNotifications(userId);
       }
     };
 
-    requestPermission();
+    setupNotifications();
 
     // Check for upcoming tasks every minute
     const checkUpcomingTasks = async () => {
