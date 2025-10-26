@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { subscribeToPushNotifications } from "@/utils/pushNotifications";
+import { subscribeToPushNotifications, requestNotificationPermission } from "@/lib/pushNotifications";
 
 interface Task {
   id: string;
@@ -16,24 +16,21 @@ export const useTaskReminders = (userId: string | undefined) => {
   useEffect(() => {
     if (!userId) return;
 
-    // Request notification permission and subscribe to push
+    // Request notification permission and setup push notifications
     const setupNotifications = async () => {
-      if ("Notification" in window && Notification.permission === "default") {
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-          // Subscribe to push notifications
-          const subscribed = await subscribeToPushNotifications(userId);
-          if (subscribed) {
-            toast.success("Push notifications enabled! You'll get reminders even when the site is closed.");
-          } else {
-            toast.success("Task reminders enabled! You'll get notifications 30 minutes before tasks.");
-          }
-        } else if (permission === "denied") {
-          toast.info("Enable notifications in your browser settings to get task reminders.");
+      const permission = await requestNotificationPermission();
+      
+      if (permission === "granted") {
+        // Subscribe to push notifications
+        const subscribed = await subscribeToPushNotifications(userId);
+        
+        if (subscribed) {
+          toast.success("Push notifications enabled! You'll get reminders even when the app is closed.");
+        } else {
+          toast.success("Task reminders enabled! You'll get notifications when the app is open.");
         }
-      } else if (Notification.permission === "granted") {
-        // Already has permission, just subscribe to push
-        await subscribeToPushNotifications(userId);
+      } else if (permission === "denied") {
+        toast.info("Enable notifications in your browser settings to get task reminders.");
       }
     };
 
